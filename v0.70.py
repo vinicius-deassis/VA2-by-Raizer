@@ -21,6 +21,7 @@ print(estoque)
 lista_estoque = [[produto, estoque[produto]["Preco"], estoque[produto]["Quantidade"]] for produto in estoque]
 lista_so_nome = [produto for produto in estoque]
 carrinho = []
+#oi
 # TELA DA FASE 00
 
 
