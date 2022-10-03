@@ -224,6 +224,7 @@ def ControleDeEstoque():
     else:
         return quant
     estoque.update({produto: mercadoria})
+    print(estoque)
     janela.find_element('-TABLE-').update(values=lista_estoque)
     janela.refresh()
 
@@ -282,7 +283,8 @@ def FinalizarCompra():
     global usuarios
     estoque = {produto[0]: {"Preco": produto[1], "Quantidade": produto[2]} for produto in lista_estoque}
     print(estoque)
-    SG.Popup(custom_text="COMPRA FEITA COM SUCESSO, OBRIGADO PELA PREFERENCIA")
+    if event == '-FCOMPRA-':
+        SG.Popup(custom_text="COMPRA FEITA COM SUCESSO, OBRIGADO PELA PREFERENCIA")
     SalvarArquivo()
     janela.close()
 
@@ -353,4 +355,5 @@ while True:
     if event is None:
         break
 
-janela.close()
+FinalizarCompra()
+
