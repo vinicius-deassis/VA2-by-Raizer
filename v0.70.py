@@ -177,6 +177,7 @@ def ControleDeEstoque():
     global estoque
     global lista_estoque
     global carrinho
+    temp_carrinho = carrinho
     produto = values["-ATTPRODUTO-"]
     mercadoria = estoque[values["-ATTPRODUTO-"]]
     quant = mercadoria.get("Quantidade")
@@ -202,7 +203,10 @@ def ControleDeEstoque():
             lista_estoque[index][2] = quant + quantidade
     elif event == '-TABLECARRINHO-':
         index2 = values['-TABLECARRINHO-'][0]
-
+        produto = temp_carrinho[index2][0]
+        index = [(i, prop.index(produto)) for i, prop in enumerate(lista_estoque) if produto in prop]
+        index = index[0][0]
+        mercadoria = estoque[produto]
         quantidade = carrinho[index2][1]
         lista_estoque[index][2] = quant + quantidade
         mercadoria.update({"Quantidade": quant + quantidade})
@@ -260,8 +264,17 @@ def ControleCarrinho():
         carrinho.pop(index_carrinho)
         janela.find_element('-TABLECARRINHO-').update(values=carrinho)
         janela.refresh()
+
     elif choice == "No":
         pass
+
+def FinalizarCompra():
+    global carrinho
+    global lista_estoque
+
+    estoque2 = {produto[0]: {"Preco": produto[1], "Quantidade": produto[2]} for produto in lista_estoque}
+    print(estoque2)
+
 
 
 def SalvarArquivo():
@@ -300,6 +313,16 @@ while True:
                 RemoverProduto()
         if event == "-CONFIRMAR-":
             ControleDeEstoque()
+        # Condicional para evitar que o usuário não coloque nada além do pedido nos campos errados
+        if event == "-PRECO-" and values["-PRECO-"] and values["-PRECO-"][-1] not in '0123456789.':
+            janela["-PRECO-"].update(values["-PRECO-"][:-1])
+
+        if event == "-QUANTIDADE-" and values["-QUANTIDADE-"] and values["-QUANTIDADE-"][-1] not in '0123456789':
+            janela["-QUANTIDADE-"].update(values["-QUANTIDADE-"][:-1])
+
+        if event == "-ATTQUANT-" and values["-ATTQUANT-"] and values["-ATTQUANT-"][-1] not in '0123456789':
+            janela["-ATTQUANT-"].update(values["-ATTQUANT-"][:-1])
+
     if fase == 2:
         if event == '-SPIN-':
             AdicionarAoCarrinho()
@@ -314,6 +337,9 @@ while True:
             janela.refresh()
         if event == "-TABLECARRINHO-":
             ControleCarrinho()
+        if event == "-FCOMPRA-":
+            FinalizarCompra()
+
 
 
     if event is None:
