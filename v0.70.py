@@ -21,7 +21,6 @@ print(estoque)
 lista_estoque = [[produto, estoque[produto]["Preco"], estoque[produto]["Quantidade"]] for produto in estoque]
 lista_so_nome = [produto for produto in estoque]
 carrinho = []
-#oi
 # TELA DA FASE 00
 
 
@@ -95,10 +94,11 @@ def telaCompra():
         [SG.HorizontalSeparator()],
         [SG.Text(f"Total = ", key="-TOTALCARRINHO-")],
         [SG.Push(), SG.Button("Finalizar compra", key="-FCOMPRA-")]
-
-
-
     ]
+    # layout_instrução =[
+    #     SG.Text(text=)
+    # ]
+
     layout = [
         [SG.Column(layout_esquerda), SG.VerticalSeparator(), SG.Column(layout_direita)]
     ]
@@ -163,7 +163,7 @@ def RegistrarCliente():
     user = values['-EMAIL-'].lower()
     senha = values['-SENHA-']
     if user not in usuarios:
-        usuarios.update({user: {"Senha": senha}})
+        usuarios.update({user: {"Senha": senha, "Carrinho": []}})
         janela.close()
         janela = telaCompra()
         janela.read()
@@ -176,26 +176,42 @@ def RegistrarCliente():
 def ControleDeEstoque():
     global estoque
     global lista_estoque
+    global carrinho
     produto = values["-ATTPRODUTO-"]
     mercadoria = estoque[values["-ATTPRODUTO-"]]
     quant = mercadoria.get("Quantidade")
     index = [(i, prop.index(produto)) for i, prop in enumerate(lista_estoque) if produto in prop]
+
     try:
         quantidade = int(values["-ATTQUANT-"])
     except KeyError:
         pass
 
     index = index[0][0]
-    if event == '-MENOS-':
-        if quant - quantidade >= 0:
-            mercadoria.update({"Quantidade": quant - quantidade})
-            lista_estoque[index][2] = quant - quantidade
-        if quant - quantidade < 0:
-            mercadoria.update({"Quantidade": 0})
-            lista_estoque[index][2] = 0
-    elif event == '-MAIS-':
-        mercadoria.update({"Quantidade": quant + quantidade})
+
+    if event == '-CONFIRMAR-':
+        if values['-MENOS-']:
+            if quant - quantidade >= 0:
+                mercadoria.update({"Quantidade": quant - quantidade})
+                lista_estoque[index][2] = quant - quantidade
+            if quant - quantidade < 0:
+                mercadoria.update({"Quantidade": 0})
+                lista_estoque[index][2] = 0
+        elif values['-MAIS-']:
+            mercadoria.update({"Quantidade": quant + quantidade})
+            lista_estoque[index][2] = quant + quantidade
+    elif event == '-TABLECARRINHO-':
+        index2 = values['-TABLECARRINHO-'][0]
+
+        quantidade = carrinho[index2][1]
         lista_estoque[index][2] = quant + quantidade
+        mercadoria.update({"Quantidade": quant + quantidade})
+    elif event == '-CARRINHO-':
+        quantidade = int(values['-SPIN-'])
+        mercadoria.update({"Quantidade": quant - quantidade})
+        lista_estoque[index][2] = quant - quantidade
+
+
     else:
         return quant
     janela.find_element('-TABLE-').update(values=lista_estoque)
@@ -227,7 +243,7 @@ def AdicionarAoCarrinho():
 
     if event == '-CARRINHO-':
         carrinho.append([produto, valor_retirado, preco_total])
-        print(carrinho)
+        ControleDeEstoque()
         janela.find_element('-TABLECARRINHO-').update(values=carrinho)
         janela.refresh()
 
@@ -235,28 +251,25 @@ def AdicionarAoCarrinho():
 def ControleCarrinho():
     global carrinho
     global janela
-    choice, _ = SG.Window('Continue?', [[SG.T('Tem certeza que quer excluir o item selecionado?')], [SG.Yes(s=10), SG.No(s=10)]], disable_close=True).read(close=True)
-    print(choice)
-    print(values['-TABLECARRINHO-'])
+    choice, _ = SG.Window('Continue?',
+                          [[SG.T('Tem certeza que quer excluir o item selecionado?')], [SG.Yes(s=10), SG.No(s=10)]],
+                          disable_close=True).read(close=True)
     if choice == "Yes":
+        ControleDeEstoque()
         index_carrinho = values['-TABLECARRINHO-'][0]
         carrinho.pop(index_carrinho)
         janela.find_element('-TABLECARRINHO-').update(values=carrinho)
         janela.refresh()
-        print(carrinho)
     elif choice == "No":
         pass
-    print(values['-TABLECARRINHO-'])
-
-
 
 
 def SalvarArquivo():
     arquivo_usuario = json.dumps(usuarios)
     arquivo_estoque = json.dumps(estoque)
 
-    file_1 = open("usuarios.json", "w")
-    file_2 = open("estoque.json", "w")
+    file_1 = open("../usuarios.json", "w")
+    file_2 = open("../estoque.json", "w")
 
     file_1.write(arquivo_usuario)
     file_2.write(arquivo_estoque)
