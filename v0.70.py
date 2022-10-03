@@ -195,15 +195,16 @@ def ControleDeEstoque():
 
     if event == '-CONFIRMAR-':
         if values['-MENOS-']:
-            if quant - quantidade >= 0:
+            if quant - quantidade > 0:
                 mercadoria.update({"Quantidade": quant - quantidade})
                 lista_estoque[index][2] = quant - quantidade
-            if quant - quantidade < 0:
+                print({produto: mercadoria})
+            if quant - quantidade <= 0:
                 mercadoria.update({"Quantidade": 0})
-                lista_estoque[index][2] = 0
         elif values['-MAIS-']:
             mercadoria.update({"Quantidade": quant + quantidade})
             lista_estoque[index][2] = quant + quantidade
+            print({produto: mercadoria})
     elif event == '-TABLECARRINHO-':
         index2 = values['-TABLECARRINHO-'][0]
         produto = temp_carrinho[index2][0]
@@ -213,15 +214,16 @@ def ControleDeEstoque():
         quantidade = carrinho[index2][1]
         lista_estoque[index][2] = quant + quantidade
         mercadoria.update({"Quantidade": quant + quantidade})
+
     elif event == '-CARRINHO-':
         quantidade = int(values['-SPIN-'])
         mercadoria.update({"Quantidade": quant - quantidade})
         lista_estoque[index][2] = quant - quantidade
-        print(produto)
 
 
     else:
         return quant
+    estoque.update({produto: mercadoria})
     janela.find_element('-TABLE-').update(values=lista_estoque)
     janela.refresh()
 
@@ -272,6 +274,7 @@ def ControleCarrinho():
     elif choice == "No":
         pass
 
+
 def FinalizarCompra():
     global carrinho
     global lista_estoque
@@ -279,17 +282,17 @@ def FinalizarCompra():
     global usuarios
     estoque = {produto[0]: {"Preco": produto[1], "Quantidade": produto[2]} for produto in lista_estoque}
     print(estoque)
-
-
-
+    SG.Popup(custom_text="COMPRA FEITA COM SUCESSO, OBRIGADO PELA PREFERENCIA")
+    SalvarArquivo()
+    janela.close()
 
 
 def SalvarArquivo():
     arquivo_usuario = json.dumps(usuarios)
     arquivo_estoque = json.dumps(estoque)
 
-    file_1 = open("../usuarios.json", "w")
-    file_2 = open("../estoque.json", "w")
+    file_1 = open("usuarios.json", "w")
+    file_2 = open("estoque.json", "w")
 
     file_1.write(arquivo_usuario)
     file_2.write(arquivo_estoque)
@@ -347,10 +350,7 @@ while True:
         if event == "-FCOMPRA-":
             FinalizarCompra()
 
-
-
     if event is None:
         break
 
-SalvarArquivo()
 janela.close()
