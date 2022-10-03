@@ -3,6 +3,7 @@ import json
 
 estoque = {}
 usuarios = {}
+usuario_atual = ""
 
 try:
     with open("usuarios.json", "r") as user_file:
@@ -110,6 +111,7 @@ def ChecarUser():
     global janela
     global log_in
     global fase
+    global usuario_atual
     user = values["-EMAIL-"].lower()
     senha = values["-SENHA-"]
 
@@ -117,6 +119,7 @@ def ChecarUser():
         if senha == (usuarios.get(user)).get("Senha"):
             log_in = True
             ChecarAdmin()
+            usuario_atual = user
             print("passou Checa")
 
     if not log_in:
@@ -214,6 +217,7 @@ def ControleDeEstoque():
         quantidade = int(values['-SPIN-'])
         mercadoria.update({"Quantidade": quant - quantidade})
         lista_estoque[index][2] = quant - quantidade
+        print(produto)
 
 
     else:
@@ -271,9 +275,12 @@ def ControleCarrinho():
 def FinalizarCompra():
     global carrinho
     global lista_estoque
+    global estoque
+    global usuarios
+    estoque = {produto[0]: {"Preco": produto[1], "Quantidade": produto[2]} for produto in lista_estoque}
+    print(estoque)
 
-    estoque2 = {produto[0]: {"Preco": produto[1], "Quantidade": produto[2]} for produto in lista_estoque}
-    print(estoque2)
+
 
 
 
